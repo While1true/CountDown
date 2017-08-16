@@ -2,6 +2,8 @@ package com.example.ck.rxjava;
 
 import android.util.Log;
 
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
@@ -29,9 +31,8 @@ public class CounManager {
         if (consumer == null)
             return this;
         //已经启动了任务，切没有结束
-        if(consumer.d!=null&&!consumer.d.isDisposed())
+        if (consumer.d != null && !consumer.d.isDisposed())
             return this;
-
         Observable.interval(0, 1, TimeUnit.SECONDS)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -61,14 +62,23 @@ public class CounManager {
     public CounManager destory() {
         if (!consumer.d.isDisposed())
             consumer.d.dispose();
+        reset();
+        return this;
+    }
+
+    private void reset() {
+        startcount=0;
+        tempstart=0;
+        max=100;
+        step=1;
         consumer.d = null;
         consumer = null;
-        return this;
     }
 
 
     /**
      * 属性配置
+     *
      * @return
      */
     private int getCount() {
@@ -103,6 +113,8 @@ public class CounManager {
      *
      * @return
      */
+    private CounManager(){
+    }
     public static CounManager getInstance() {
         return SingleHolder.counManager;
     }
@@ -113,6 +125,7 @@ public class CounManager {
 
     /**
      * observer
+     *
      * @param <T>
      */
     public static abstract class MyObserver<T> implements Observer<T> {
